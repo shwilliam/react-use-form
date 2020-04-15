@@ -7,6 +7,7 @@
     "dev": "tsc --watch",
     "build": "tsc",
     "prepublishOnly": "npm run build",
+    "demo:setup": "rm -rf ./demo/src/react-use-form && npm run build && cp -r ./dist ./demo/src/react-use-form"
   },
   "files": [
     "dist/*"
