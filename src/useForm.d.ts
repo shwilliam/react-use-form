@@ -1,4 +1,4 @@
-export interface IListeners {
+export interface IHandlers {
   onSubmit: (values: IValues) => any
 }
 

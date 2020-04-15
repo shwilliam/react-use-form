@@ -1,10 +1,10 @@
 import {useCallback, useMemo, useState} from 'react'
 import {swallow} from './utils'
-import {IFields, IListeners} from './useForm.d'
+import {IFields, IHandlers} from './useForm.d'
 
 // TODO: handle all native input types
 
-export const useForm = (fields: IFields, listeners: IListeners) => {
+export const useForm = (fields: IFields, handlers: IHandlers) => {
   // TODO: refactor to use a reducer
   // TODO: track and expose `isSubmitting`
   let [touched, setTouched] = useState({})
@@ -81,9 +81,9 @@ export const useForm = (fields: IFields, listeners: IListeners) => {
       const isFormValid = validateForm()
       if (!isFormValid) return
 
-      swallow(() => listeners.onSubmit(values))
+      swallow(() => handlers.onSubmit(values))
     },
-    [validateForm, listeners],
+    [validateForm, handlers],
   )
 
   const fieldProps = useMemo(
@@ -110,7 +110,7 @@ export const useForm = (fields: IFields, listeners: IListeners) => {
     touched,
     props: {
       form: {
-        ...listeners,
+        ...handlers,
         onSubmit: handleFormSubmit,
       },
       ...fieldProps,
