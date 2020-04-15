@@ -1,3 +1,23 @@
+export interface IState {
+  isValid: boolean
+  submitting: boolean
+  touched: IStateTouched
+  errors: IStateErrors
+  values: IStateValues
+}
+
+export interface IStateValues {
+  [name: string]: string
+}
+
+export interface IStateTouched {
+  [name: string]: boolean
+}
+
+export interface IStateErrors {
+  [name: string]: string
+}
+
 export interface IFormReducerAction {
   type: string
   payload?: IFormReducerActionPayload

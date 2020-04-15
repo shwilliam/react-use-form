@@ -1,7 +1,7 @@
 import {nullOrUndefined} from './utils'
-import {IFormReducerAction} from './form-reducer.d'
+import {IFormReducerAction, IState, IStateErrors} from './form-reducer.d'
 
-export const formReducer = (state: any, action: IFormReducerAction): any => {
+export const formReducer = (state: IState, action: IFormReducerAction): IState => {
   switch (action.type) {
     case 'SET_ERROR':
       if (!action.payload || !action.payload.name) {
@@ -16,7 +16,7 @@ export const formReducer = (state: any, action: IFormReducerAction): any => {
 
       return {
         ...state,
-        errors: updatedErrors,
+        errors: updatedErrors as IStateErrors,
         isValid: Object.values(fieldErrors).every(error => error === null),
       }
 
@@ -27,7 +27,7 @@ export const formReducer = (state: any, action: IFormReducerAction): any => {
 
       return {
         ...state,
-        submitting: action.payload.submitting,
+        submitting: action.payload.submitting as boolean,
       }
 
     case 'SET_FORM_VALIDITY':
@@ -37,7 +37,7 @@ export const formReducer = (state: any, action: IFormReducerAction): any => {
 
       return {
         ...state,
-        isValid: action.payload.isValid,
+        isValid: action.payload.isValid as boolean,
       }
 
     case 'SET_FIELD_VALUE':
