@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useState} from 'react'
+import {FormEvent, useCallback, useMemo, useState} from 'react'
 import {swallow} from './utils'
 import {IFields, IHandlers} from './useForm.d'
 
@@ -22,7 +22,7 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
 
   // TODO: async validation
   const validateField = useCallback(
-    (name: string, el?: any, value = values[name]) => {
+    (name: string, el?: HTMLInputElement, value = values[name]) => {
       if (typeof fields[name].validate === 'function') {
         const error = fields[name].validate(value)
 
@@ -47,10 +47,11 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
   )
 
   const handleChange = useCallback(
-    (e: any) => {
-      const {name, value} = e.target
+    (e: FormEvent<HTMLInputElement>) => {
+      const target = e.target as HTMLInputElement
+      const {name, value} = target
 
-      if (errors[name]) validateField(name, e.target, value)
+      if (errors[name]) validateField(name, target, value)
 
       setValues({
         ...values,
@@ -61,13 +62,14 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
   )
 
   const handleBlur = useCallback(
-    (e: any) => {
+    (e: FormEvent<HTMLInputElement>) => {
       e.persist()
-      const {name, value} = e.target
+      const target = e.target as HTMLInputElement
+      const {name, value} = target
 
       if (!touched[name]) setTouched(s => ({...s, [name]: true}))
 
-      validateField(name, e.target, value)
+      validateField(name, target, value)
 
       swallow(() => fields[name].onBlur(e))
     },
@@ -75,7 +77,7 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
   )
 
   const handleFormSubmit = useCallback(
-    (e: any) => {
+    (e: FormEvent<HTMLInputElement>) => {
       e.preventDefault()
 
       const isFormValid = validateForm()
