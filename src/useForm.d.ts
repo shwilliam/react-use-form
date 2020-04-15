@@ -1,5 +1,9 @@
 export interface IHandlers {
-  onSubmit: (values: IValues) => any
+  onSubmit: (
+    values: IValues,
+    onCompleteCallback: () => void,
+    onErrorCallback: (errorMessage: string) => void,
+  ) => any
 }
 
 export interface IValues {

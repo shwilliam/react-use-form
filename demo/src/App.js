@@ -18,7 +18,7 @@ const validateAge = value => {
 }
 
 export const App = () => {
-  const {props, values, errors, touched} = useForm(
+  const {props, values, errors, touched, submitting, valid} = useForm(
     {
       name: {initial: '', validate: validateName},
       age: {
@@ -30,7 +30,17 @@ export const App = () => {
       nickname: {initial: ''},
     },
     {
-      onSubmit: values => console.log('Submitted: ', values),
+      onSubmit: (values, onSuccess, onError) => {
+        setTimeout(() => {
+          if (Math.random() > 0.5) {
+            console.log('Submitted: ', values)
+            onSuccess()
+          } else {
+            alert('Something went wrong')
+            onError('Some useful error message')
+          }
+        }, 1000)
+      },
     },
   )
 
@@ -52,7 +62,9 @@ export const App = () => {
           <input name="age" type="number" {...props.age} />
         </label>
 
-        <button type="submit">Submit</button>
+        <button type="submit" disabled={!valid}>
+          Submit
+        </button>
       </form>
 
       <section>
@@ -62,6 +74,10 @@ export const App = () => {
         Values: {JSON.stringify(values)}
         <hr />
         Errors: {JSON.stringify(errors)}
+        <hr />
+        Submitting: {submitting ? 'true' : 'false'}
+        <hr />
+        Valid: {valid ? 'true' : 'false'}
         <hr />
       </section>
     </>

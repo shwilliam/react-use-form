@@ -1,12 +1,15 @@
-import {FormEvent, useCallback, useMemo, useState} from 'react'
+import {FormEvent, useCallback, useMemo, useState, useEffect} from 'react'
 import {swallow} from './utils'
 import {IFields, IHandlers} from './useForm.d'
 
 // TODO: handle all native input types
+// TODO: trigger invalid field states on submit
+// TODO: enable sharing field props through context
 
 export const useForm = (fields: IFields, handlers: IHandlers) => {
   // TODO: refactor to use a reducer
-  // TODO: track and expose `isSubmitting`
+  let [isValid, setIsValid] = useState(false)
+  let [submitting, setSubmitting] = useState(false)
   let [touched, setTouched] = useState({})
   let [errors, setErrors] = useState({})
   // TODO: persist form values with local storage
@@ -26,7 +29,15 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
       if (typeof fields[name].validate === 'function') {
         const error = fields[name].validate(value)
 
-        setErrors(s => ({...s, [name]: error || null}))
+        setErrors(s => {
+          const updatedErrors = {...s, [name]: error || null}
+
+          setIsValid(
+            Object.values(updatedErrors).every(error => error === null)
+          )
+
+          return updatedErrors
+        })
 
         swallow(() => el?.setCustomValidity(error || ''))
 
@@ -37,12 +48,17 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
   )
 
   const validateForm = useCallback(
-    () =>
-      Object.keys(fields).reduce((formIsValid, name) => {
-        const fieldError = validateField(name)
+    () => {
+      const isValid = Object.keys(fields).reduce((formIsValid, name) => {
+        const fieldIsValid = validateField(name)
 
-        return !fieldError || formIsValid
-      }, true),
+        return formIsValid ? fieldIsValid : false
+      }, true)
+
+      setIsValid(isValid)
+
+      return isValid
+    },
     [fields, validateField],
   )
 
@@ -51,7 +67,9 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
       const target = e.target as HTMLInputElement
       const {name, value} = target
 
-      if (errors[name]) validateField(name, target, value)
+      if (errors[name] || document.activeElement !== target) {
+        validateField(name, target, value)
+      }
 
       setValues({
         ...values,
@@ -76,14 +94,31 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
     [touched, setTouched, validateField, fields],
   )
 
+  const handleFormSubmitSuccess = useCallback(() => {
+    setErrors(s => ({...s, form: null}))
+    setSubmitting(false)
+  }, [setErrors, setSubmitting])
+
+  const handleFormSubmitError = useCallback((e: string) => {
+    setErrors(s => ({...s, form: e}))
+    setSubmitting(false)
+  }, [setErrors])
+
   const handleFormSubmit = useCallback(
     (e: FormEvent<HTMLInputElement>) => {
       e.preventDefault()
 
+      if (submitting) return
+
       const isFormValid = validateForm()
       if (!isFormValid) return
 
-      swallow(() => handlers.onSubmit(values))
+      swallow(() => handlers.onSubmit(
+        values,
+        handleFormSubmitSuccess,
+        handleFormSubmitError,
+      ))
+      setSubmitting(true)
     },
     [validateForm, handlers],
   )
@@ -106,10 +141,17 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
     [values, handleChange, handleBlur],
   )
 
+  // check validity on mount
+  useEffect(() => {
+    validateForm()
+  }, [])
+
   return {
     values,
     errors,
     touched,
+    submitting,
+    valid: isValid,
     props: {
       form: {
         ...handlers,
