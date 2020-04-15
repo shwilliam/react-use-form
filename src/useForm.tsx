@@ -1,5 +1,5 @@
 import {FormEvent, useCallback, useMemo, useState, useEffect} from 'react'
-import {swallow} from './utils'
+import {callIfExists} from './utils'
 import {IFields, IHandlers} from './useForm.d'
 
 // TODO: handle all native input types
@@ -25,7 +25,7 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
 
   // TODO: async validation
   const validateField = useCallback(
-    (name: string, el?: HTMLInputElement, value = values[name]) => {
+    (name: string, value = values[name], el?: HTMLInputElement) => {
       if (typeof fields[name].validate === 'function') {
         const error = fields[name].validate(value)
 
@@ -39,7 +39,7 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
           return updatedErrors
         })
 
-        swallow(() => el?.setCustomValidity(error || ''))
+        if (el) callIfExists(el, 'setCustomValidity', error || '')
 
         return !error
       } else return true
@@ -50,6 +50,7 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
   const validateForm = useCallback(
     () => {
       const isValid = Object.keys(fields).reduce((formIsValid, name) => {
+        // run validation on all fields
         const fieldIsValid = validateField(name)
 
         return formIsValid ? fieldIsValid : false
@@ -68,7 +69,17 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
       const {name, value} = target
 
       if (errors[name] || document.activeElement !== target) {
-        validateField(name, target, value)
+        validateField(
+          name,
+          value,
+          touched[name] || document.activeElement !== target
+            ? target
+            : undefined,
+        )
+      }
+
+      if (!touched[name] && document.activeElement !== target) {
+        setTouched(s => ({...s, [name]: true}))
       }
 
       setValues({
@@ -87,9 +98,9 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
 
       if (!touched[name]) setTouched(s => ({...s, [name]: true}))
 
-      validateField(name, target, value)
+      validateField(name, value, target)
 
-      swallow(() => fields[name].onBlur(e))
+      if (fields[name]) callIfExists(fields[name], 'onBlur', e)
     },
     [touched, setTouched, validateField, fields],
   )
@@ -99,8 +110,8 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
     setSubmitting(false)
   }, [setErrors, setSubmitting])
 
-  const handleFormSubmitError = useCallback((e: string) => {
-    setErrors(s => ({...s, form: e}))
+  const handleFormSubmitError = useCallback((errorMessage: string) => {
+    setErrors(s => ({...s, form: errorMessage}))
     setSubmitting(false)
   }, [setErrors])
 
@@ -110,14 +121,9 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
 
       if (submitting) return
 
-      const isFormValid = validateForm()
-      if (!isFormValid) return
+      if (!validateForm()) return
 
-      swallow(() => handlers.onSubmit(
-        values,
-        handleFormSubmitSuccess,
-        handleFormSubmitError,
-      ))
+      callIfExists(handlers, 'onSubmit', values, handleFormSubmitSuccess, handleFormSubmitError)
       setSubmitting(true)
     },
     [validateForm, handlers],
