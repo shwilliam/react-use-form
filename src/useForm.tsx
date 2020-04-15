@@ -7,6 +7,28 @@ import {IFields, IHandlers} from './useForm.d'
 // TODO: trigger invalid field states on submit
 // TODO: enable sharing field props through context
 
+/**
+ * Custom form hook.
+ *
+ * ```typescript
+ * const {props, values, errors, touched, submitting, valid} = useForm(
+ *   {
+ *     name: {initial: '', validate: val => !val ? 'Required' : null},
+ *     favColor: {initial: 'blue', onFocus: doSomethingFancy},
+ *   },
+ *   {
+ *     onSubmit: (values, onSuccess, onError) => {
+ *       doSomethingWithValues(values)
+ *         .then(onSuccess)
+ *         .catch(() => onError('Some useful error message'))
+ *     },
+ *   },
+ * )
+ * ```
+ *
+ * @param fields  Field config object.
+ * @param handlers  Form handlers.
+ */
 export const useForm = (fields: IFields, handlers: IHandlers) => {
   const [state, dispatch] = useReducer(formReducer, {
     isValid: false,
