@@ -1,0 +1,41 @@
+{
+  "name": "@shwilliam/react-use-form",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+  },
+  "files": [
+    "dist/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shwilliam/react-use-form.git"
+  },
+  "keywords": [
+    "react",
+    "hooks",
+    "forms"
+  ],
+  "author": "William L <w-lindvall@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shwilliam/react-use-form/issues"
+  },
+  "homepage": "https://github.com/shwilliam/react-use-form#readme",
+  "dependencies": {},
+  "peerDependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@types/react": "^16.9.34",
+    "eslint": "^6.1.0",
+    "eslint-plugin-react": "^7.14.3",
+    "react": "^16.13.1",
+    "typescript": "^3.6.3"
+  }
+}
