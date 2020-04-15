@@ -1,4 +1,5 @@
-import {FormEvent, useCallback, useMemo, useState, useEffect} from 'react'
+import {FormEvent, useCallback, useEffect, useMemo, useReducer} from 'react'
+import {formReducer} from './form-reducer'
 import {callIfExists} from './utils'
 import {IFields, IHandlers} from './useForm.d'
 
@@ -7,44 +8,34 @@ import {IFields, IHandlers} from './useForm.d'
 // TODO: enable sharing field props through context
 
 export const useForm = (fields: IFields, handlers: IHandlers) => {
-  // TODO: refactor to use a reducer
-  let [isValid, setIsValid] = useState(false)
-  let [submitting, setSubmitting] = useState(false)
-  let [touched, setTouched] = useState({})
-  let [errors, setErrors] = useState({})
-  // TODO: persist form values with local storage
-  const [values, setValues] = useState(
-    Object.keys(fields).reduce(
+  const [state, dispatch] = useReducer(formReducer, {
+    isValid: false,
+    submitting: false,
+    touched: {},
+    errors: {},
+    values: Object.keys(fields).reduce(
       (values, name) => ({
         ...values,
         [name]: fields[name].initial,
       }),
       {},
     ),
-  )
+  })
 
   // TODO: async validation
   const validateField = useCallback(
-    (name: string, value = values[name], el?: HTMLInputElement) => {
+    (name: string, value = state.values[name], el?: HTMLInputElement) => {
       if (typeof fields[name].validate === 'function') {
         const error = fields[name].validate(value)
 
-        setErrors(s => {
-          const updatedErrors = {...s, [name]: error || null}
-
-          setIsValid(
-            Object.values(updatedErrors).every(error => error === null)
-          )
-
-          return updatedErrors
-        })
+        dispatch({type: 'SET_ERROR', payload: {name, error}})
 
         if (el) callIfExists(el, 'setCustomValidity', error || '')
 
         return !error
       } else return true
     },
-    [fields, setErrors],
+    [fields, dispatch],
   )
 
   const validateForm = useCallback(
@@ -56,11 +47,11 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
         return formIsValid ? fieldIsValid : false
       }, true)
 
-      setIsValid(isValid)
+      dispatch({type: 'SET_FORM_VALIDITY', payload: {isValid}})
 
       return isValid
     },
-    [fields, validateField],
+    [fields, validateField, dispatch],
   )
 
   const handleChange = useCallback(
@@ -68,26 +59,23 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
       const target = e.target as HTMLInputElement
       const {name, value} = target
 
-      if (errors[name] || document.activeElement !== target) {
+      if (state.errors[name] || document.activeElement !== target) {
         validateField(
           name,
           value,
-          touched[name] || document.activeElement !== target
+          state.touched[name] || document.activeElement !== target
             ? target
             : undefined,
         )
       }
 
-      if (!touched[name] && document.activeElement !== target) {
-        setTouched(s => ({...s, [name]: true}))
+      if (!state.touched[name] && document.activeElement !== target) {
+        dispatch({type: 'SET_FIELD_TOUCHED', payload: {name}})
       }
 
-      setValues({
-        ...values,
-        [name]: value,
-      })
+      dispatch({type: 'SET_FIELD_VALUE', payload: {name, value}})
     },
-    [setValues, errors],
+    [state.errors, dispatch],
   )
 
   const handleBlur = useCallback(
@@ -96,42 +84,44 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
       const target = e.target as HTMLInputElement
       const {name, value} = target
 
-      if (!touched[name]) setTouched(s => ({...s, [name]: true}))
+      if (!state.touched[name]) {
+        dispatch({type: 'SET_FIELD_TOUCHED', payload: {name}})
+      }
 
       validateField(name, value, target)
 
       if (fields[name]) callIfExists(fields[name], 'onBlur', e)
     },
-    [touched, setTouched, validateField, fields],
+    [state.touched, dispatch, validateField, fields],
   )
 
   const handleFormSubmitSuccess = useCallback(() => {
-    setErrors(s => ({...s, form: null}))
-    setSubmitting(false)
-  }, [setErrors, setSubmitting])
+    dispatch({type: 'SET_ERROR', payload: {name: 'form', error: undefined}})
+    dispatch({type: 'SET_SUBMITTING', payload: {submitting: false}})
+  }, [dispatch])
 
   const handleFormSubmitError = useCallback((errorMessage: string) => {
-    setErrors(s => ({...s, form: errorMessage}))
-    setSubmitting(false)
-  }, [setErrors])
+    dispatch({type: 'SET_ERROR', payload: {name: 'form', error: errorMessage}})
+    dispatch({type: 'SET_SUBMITTING', payload: {submitting: false}})
+  }, [dispatch])
 
   const handleFormSubmit = useCallback(
     (e: FormEvent<HTMLInputElement>) => {
       e.preventDefault()
 
-      if (submitting) return
+      if (state.submitting) return
 
       if (!validateForm()) return
 
-      callIfExists(handlers, 'onSubmit', values, handleFormSubmitSuccess, handleFormSubmitError)
-      setSubmitting(true)
+      callIfExists(handlers, 'onSubmit', state.values, handleFormSubmitSuccess, handleFormSubmitError)
+      dispatch({type: 'SET_SUBMITTING', payload: {submitting: true}})
     },
     [validateForm, handlers],
   )
 
   const fieldProps = useMemo(
     () =>
-      Object.keys(values).reduce((props, name) => {
+      Object.keys(state.values).reduce((props, name) => {
         const {validate, ...fieldListeners} = fields[name]
 
         return {
@@ -140,11 +130,11 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
             ...fieldListeners,
             onChange: handleChange,
             onBlur: handleBlur,
-            value: values[name],
+            value: state.values[name],
           },
         }
       }, {}),
-    [values, handleChange, handleBlur],
+    [state.values, dispatch, handleChange, handleBlur],
   )
 
   // check validity on mount
@@ -152,12 +142,20 @@ export const useForm = (fields: IFields, handlers: IHandlers) => {
     validateForm()
   }, [])
 
+  useEffect(() => {
+    const {form, ...fieldErrors} = state.errors
+
+    dispatch({type: 'SET_FORM_VALIDITY', payload: {
+      isValid: Object.values(fieldErrors).every(error => error === null)
+    }})
+  }, [state.errors, dispatch])
+
   return {
-    values,
-    errors,
-    touched,
-    submitting,
-    valid: isValid,
+    values: state.values,
+    errors: state.errors,
+    touched: state.touched,
+    submitting: state.submitting,
+    valid: state.isValid,
     props: {
       form: {
         ...handlers,

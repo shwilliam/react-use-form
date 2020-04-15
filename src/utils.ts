@@ -3,3 +3,6 @@ export const callIfExists = (obj: any, method: string, ...args: any[]): any => {
     return obj[method](...args)
   }
 }
+
+export const nullOrUndefined =
+  (value: any): boolean => ['null', 'undefined'].includes(typeof value)
