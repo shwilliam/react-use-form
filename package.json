@@ -7,20 +7,15 @@
     "dev": "tsc --watch",
     "build": "tsc",
     "prepublishOnly": "npm run build",
+    "docs:build": "typedoc --out docs --theme minimal --includeDeclarations --excludeExternals --mode file src",
     "demo:setup": "rm -rf ./demo/src/react-use-form && npm run build && cp -r ./dist ./demo/src/react-use-form"
   },
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shwilliam/react-use-form.git"
   },
-  "keywords": [
-    "react",
-    "hooks",
-    "forms"
-  ],
+  "keywords": ["react", "hooks", "forms"],
   "author": "William L <w-lindvall@outlook.com>",
   "license": "MIT",
   "bugs": {
@@ -37,6 +32,7 @@
     "eslint": "^6.1.0",
     "eslint-plugin-react": "^7.14.3",
     "react": "^16.13.1",
+    "typedoc": "^0.17.4",
     "typescript": "^3.6.3"
   }
 }
