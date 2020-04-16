@@ -1,7 +1,7 @@
 {
   "name": "@shwilliam/react-use-form",
   "version": "0.1.0",
-  "description": "",
+  "description": "A tiny custom form hook with a small API",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsc --watch",
