@@ -11,7 +11,8 @@ npm i @shwilliam/react-use-form
 ## Usage
 
 The following example demonstrates how to use the `useForm` hook in a simple
-form component.
+form component. Refer to the [documentation](https://react-use-form.netlify.app/)
+for more details.
 
 ```jsx
 import React from 'react'
