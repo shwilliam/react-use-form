@@ -2773,13 +2773,62 @@ img {
 			<blockquote>
 				<p>A tiny custom form hook with a small API</p>
 			</blockquote>
+			<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+				<h2>Installation</h2>
+			</a>
+			<pre><code class="language-shell">npm i @shwilliam/react-use-form</code></pre>
+			<a href="#usage" id="usage" style="color: inherit; text-decoration: none;">
+				<h2>Usage</h2>
+			</a>
+			<p>The following example demonstrates how to use the <code>useForm</code> hook in a simple
+			form component.</p>
+			<pre><code class="language-jsx"><span class="hljs-keyword">import</span> React <span class="hljs-keyword">from</span> <span class="hljs-string">'react'</span>
+<span class="hljs-keyword">import</span> {useForm} <span class="hljs-keyword">from</span> <span class="hljs-string">'@shwilliam/react-use-form'</span>
+<span class="hljs-keyword">import</span> {doSomethingFancy} <span class="hljs-keyword">from</span> <span class="hljs-string">'./fancy-things'</span>
+
+<span class="hljs-keyword">const</span> validateName = <span class="hljs-function"><span class="hljs-params">value</span> =&gt;</span> (!value ? <span class="hljs-string">'Name required'</span> : <span class="hljs-literal">null</span>)
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> App = <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> {
+  <span class="hljs-keyword">const</span> {props, values, errors, touched, submitting, valid} = useForm(
+    {
+      <span class="hljs-attr">name</span>: {<span class="hljs-attr">initial</span>: <span class="hljs-string">''</span>, <span class="hljs-attr">validate</span>: validateName},
+      <span class="hljs-attr">favColor</span>: {<span class="hljs-attr">initial</span>: <span class="hljs-string">'blue'</span>, <span class="hljs-attr">onFocus</span>: doSomethingFancy},
+    },
+    {
+      <span class="hljs-attr">onSubmit</span>: <span class="hljs-function">(<span class="hljs-params">values, onSuccess, onError</span>) =&gt;</span> {
+        doSomethingWithValues(values)
+          .then(onSuccess)
+          .catch(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> onError(<span class="hljs-string">'Something went wrong'</span>))
+      },
+    },
+  )
+
+  <span class="hljs-keyword">return</span> (
+    <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">form</span> {<span class="hljs-attr">...props.form</span>}&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+        Name:
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"name"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> {<span class="hljs-attr">...props.name</span>} /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+
+      <span class="hljs-tag">&lt;<span class="hljs-name">label</span>&gt;</span>
+        Favorite color:
+        <span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">name</span>=<span class="hljs-string">"favColor"</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text"</span> {<span class="hljs-attr">...props.favColor</span>} /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+
+      <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"submit"</span> <span class="hljs-attr">disabled</span>=<span class="hljs-string">{!valid}</span>&gt;</span>
+        Submit
+      <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></span>
+  )
+}</code></pre>
 			<a href="#opinions" id="opinions" style="color: inherit; text-decoration: none;">
 				<h2>Opinions</h2>
 			</a>
 			<p>This hook has several opinions about using/building forms. Some of these align
-				closely with similar libraries such as <code>Formik</code> or <code>react-hook-form</code>, and some
-				don&#39;t. Before you choose to use this package in your project, ensure you agree
-			with or have a workaround for the following:</p>
+				closely with similar libraries such as <a href="https://jaredpalmer.com/formik/"><code>Formik</code></a>
+				or <a href="https://react-hook-form.com/"><code>react-hook-form</code></a>, and some don&#39;t. Before you
+				choose to use this package in your project, ensure you agree with or have a
+			workaround for the following:</p>
 			<ul>
 				<li>Field validation runs on blur and only on input if field is invalid</li>
 				<li>A field is considered touched when left (on blur)</li>
@@ -2788,6 +2837,18 @@ img {
 				<li><code>onSubmit</code> handler passed to hook is called with form values</li>
 				<li>All form-related values and handlers are accessed from one hook call per form</li>
 			</ul>
+			<a href="#development" id="development" style="color: inherit; text-decoration: none;">
+				<h2>Development</h2>
+			</a>
+			<p>To start local development, simply install npm dependencies (<code>npm i</code>) and run
+			<code>npm run dev</code> to watch ts files in <code>src/</code>. Built files can be found in <code>dist/</code>.</p>
+			<a href="#demo" id="demo" style="color: inherit; text-decoration: none;">
+				<h2>Demo</h2>
+			</a>
+			<p>To run the demo, ensure you have run the build script and have a <code>dist</code> dir in
+				your project root. Then run <code>npm run demo:setup</code> to copy these to the demo.
+				Navigate to the demo and install its dependencies (<code>cd demo &amp;&amp; npm i</code>). You can
+			now start the demo app locally by running <code>npm start</code>.</p>
 		</div>
 		<div style="position:relative;"><a name="typedoc-main-index" class="tsd-anchor"></a></div>
 		<section class="tsd-panel-group tsd-index-group">
@@ -2834,7 +2895,7 @@ img {
 				<div class="tsd-signature tsd-kind-icon">validation<wbr>Fn<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">boolean</span></div>
 				<aside class="tsd-sources">
 					<ul>
-						<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/4e90e97/src/useForm.d.ts#L20">useForm.d.ts:20</a></li>
+						<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/1c9380f/src/useForm.d.ts#L20">useForm.d.ts:20</a></li>
 					</ul>
 				</aside>
 				<div class="tsd-type-declaration">
@@ -2872,7 +2933,7 @@ img {
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/4e90e97/src/utils.ts#L1">utils.ts:1</a></li>
+								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/1c9380f/src/utils.ts#L1">utils.ts:1</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2901,7 +2962,7 @@ img {
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/4e90e97/src/form-reducer.ts#L4">form-reducer.ts:4</a></li>
+								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/1c9380f/src/form-reducer.ts#L4">form-reducer.ts:4</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2927,7 +2988,7 @@ img {
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/4e90e97/src/utils.ts#L7">utils.ts:7</a></li>
+								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/1c9380f/src/utils.ts#L7">utils.ts:7</a></li>
 							</ul>
 						</aside>
 						<h4 class="tsd-parameters-title">Parameters</h4>
@@ -2950,20 +3011,20 @@ img {
 					<li class="tsd-description">
 						<aside class="tsd-sources">
 							<ul>
-								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/4e90e97/src/useForm.tsx#L32">useForm.tsx:32</a></li>
+								<li>Defined in <a href="https://github.com/shwilliam/react-use-form/blob/1c9380f/src/useForm.tsx#L32">useForm.tsx:32</a></li>
 							</ul>
 						</aside>
 						<div class="tsd-comment tsd-typography">
 							<div class="lead">
 								<p>Custom form hook.</p>
 							</div>
-							<pre><code class="language-typescript"><span class="hljs-keyword">const</span> {props, values, errors, touched, submitting, valid} = useForm(
+							<pre><code class="language-js"><span class="hljs-keyword">const</span> {props, values, errors, touched, submitting, valid} = useForm(
   {
-    name: {initial: <span class="hljs-string">''</span>, validate: <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> !val ? <span class="hljs-string">'Required'</span> : <span class="hljs-literal">null</span>},
-    favColor: {initial: <span class="hljs-string">'blue'</span>, onFocus: doSomethingFancy},
+    <span class="hljs-attr">name</span>: {<span class="hljs-attr">initial</span>: <span class="hljs-string">''</span>, <span class="hljs-attr">validate</span>: <span class="hljs-function"><span class="hljs-params">val</span> =&gt;</span> !val ? <span class="hljs-string">'Required'</span> : <span class="hljs-literal">null</span>},
+    <span class="hljs-attr">favColor</span>: {<span class="hljs-attr">initial</span>: <span class="hljs-string">'blue'</span>, <span class="hljs-attr">onFocus</span>: doSomethingFancy},
   },
   {
-    onSubmit: <span class="hljs-function">(<span class="hljs-params">values, onSuccess, onError</span>) =&gt;</span> {
+    <span class="hljs-attr">onSubmit</span>: <span class="hljs-function">(<span class="hljs-params">values, onSuccess, onError</span>) =&gt;</span> {
       doSomethingWithValues(values)
         .then(onSuccess)
         .catch(<span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> onError(<span class="hljs-string">'Some useful error message'</span>))
