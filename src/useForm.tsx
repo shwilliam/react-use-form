@@ -10,7 +10,7 @@ import {IFields, IHandlers} from './useForm.d'
 /**
  * Custom form hook.
  *
- * ```typescript
+ * ```js
  * const {props, values, errors, touched, submitting, valid} = useForm(
  *   {
  *     name: {initial: '', validate: val => !val ? 'Required' : null},
