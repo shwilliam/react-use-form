@@ -1,5 +1,5 @@
 import React from 'react'
-import useForm from './react-use-form'
+import {useForm} from './react-use-form'
 
 const validateName = value => {
   if (!value) {
